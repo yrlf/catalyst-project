@@ -41,7 +41,7 @@ const AtomVisualizer = ({ positions, elements }) => {
         };
 
         positions.forEach((pos, index) => {
-            const element = elements[index] || 'default';
+            const element = pos['element']|| 'default';
             const color = colors[element] || colors.default;
             const material = new THREE.MeshBasicMaterial({ color });
             const geometry = new THREE.SphereGeometry(0.2, 32, 32);
