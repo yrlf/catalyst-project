@@ -4,8 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 const AtomVisualizer = ({ positions, elements }) => {
     const mountRef = useRef(null);
-    const cameraRef = useRef(new THREE.PerspectiveCamera(
-        25, 1, 1, 1000));  // Aspect ratio set to 1 initially, adjusted later
+    const cameraRef = useRef(new THREE.PerspectiveCamera(25, 1, 1, 1000));
 
     useEffect(() => {
         if (!positions || !elements || positions.length === 0 || elements.length === 0) {
@@ -23,7 +22,7 @@ const AtomVisualizer = ({ positions, elements }) => {
         const resizeRenderer = () => {
             if (mountRef.current) {
                 const width = mountRef.current.clientWidth;
-                const height = mountRef.current.clientHeight*2;
+                const height = mountRef.current.clientHeight * 2; // Adjust height accordingly
                 renderer.setSize(width, height);
                 camera.aspect = width / height;
                 camera.updateProjectionMatrix();
@@ -31,8 +30,8 @@ const AtomVisualizer = ({ positions, elements }) => {
         };
 
         mountRef.current.appendChild(renderer.domElement);
-        resizeRenderer(); // Call to resize and adjust aspect ratio initially
-        window.addEventListener('resize', resizeRenderer); // Adjust canvas size on resize
+        resizeRenderer();
+        window.addEventListener('resize', resizeRenderer);
 
         const colors = {
             Cu: 0xff0000,
@@ -42,7 +41,7 @@ const AtomVisualizer = ({ positions, elements }) => {
         };
 
         positions.forEach((pos, index) => {
-            const element = pos['element'] || 'default';
+            const element = elements[index] || 'default';
             const color = colors[element] || colors.default;
             const material = new THREE.MeshBasicMaterial({ color });
             const geometry = new THREE.SphereGeometry(0.2, 32, 32);
@@ -71,7 +70,9 @@ const AtomVisualizer = ({ positions, elements }) => {
 
         return () => {
             window.removeEventListener('resize', resizeRenderer);
-            mountRef.current.removeChild(renderer.domElement);
+            if (mountRef.current && mountRef.current.contains(renderer.domElement)) {
+                mountRef.current.removeChild(renderer.domElement);
+            }
             renderer.dispose();
             scene.children.forEach(child => {
                 if (child.geometry) child.geometry.dispose();
@@ -80,7 +81,7 @@ const AtomVisualizer = ({ positions, elements }) => {
             });
             controls.dispose();
         };
-    }, [positions, elements]);  // Adjust dependencies as needed
+    }, [positions, elements]);
 
     const handleZoomIn = () => {
         cameraRef.current.fov *= 0.9;
@@ -100,11 +101,10 @@ const AtomVisualizer = ({ positions, elements }) => {
 
     return (
         <div className="viewer-container" ref={mountRef} style={{ width: '50%', height: '50%', position: 'relative' }}>
-            {/* <button onClick={handleZoomIn}>Zoom In</button>
+            <button onClick={handleZoomIn}>Zoom In</button>
             <button onClick={handleZoomOut}>Zoom Out</button>
-            <button onClick={handleResetView}>Reset View</button> */}
+            <button onClick={handleResetView}>Reset View</button>
         </div>
-         
     );
 };
 
