@@ -4,7 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 const AtomVisualizer = ({ positions, elements }) => {
     const mountRef = useRef(null);
-    const cameraRef = useRef(new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000));
+    const cameraRef = useRef(new THREE.PerspectiveCamera(
+        25, 1, 1, 1000));  // Aspect ratio set to 1 initially, adjusted later
 
     useEffect(() => {
         if (!positions || !elements || positions.length === 0 || elements.length === 0) {
@@ -13,24 +14,36 @@ const AtomVisualizer = ({ positions, elements }) => {
         }
 
         const scene = new THREE.Scene();
-        const camera = cameraRef.current; // Use camera from the ref
-        camera.position.z = 50; // Adjust this value to ensure all atoms are visible initially
+        const camera = cameraRef.current;
+        camera.position.z = 50;
 
         const renderer = new THREE.WebGLRenderer({ alpha: true });
-        renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+        renderer.setClearColor(0x888888); // Sets background color to grey
+
+        const resizeRenderer = () => {
+            if (mountRef.current) {
+                const width = mountRef.current.clientWidth;
+                const height = mountRef.current.clientHeight*2;
+                renderer.setSize(width, height);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            }
+        };
+
         mountRef.current.appendChild(renderer.domElement);
+        resizeRenderer(); // Call to resize and adjust aspect ratio initially
+        window.addEventListener('resize', resizeRenderer); // Adjust canvas size on resize
 
         const colors = {
             Cu: 0xff0000,
             C: 0x00ff00,
             O: 0x0000ff,
-            default: 0xaaaaaa  // Default color for elements not listed,
+            default: 0xaaaaaa  // Default color for elements not listed
         };
 
         positions.forEach((pos, index) => {
-            const element = pos['element'];
+            const element = pos['element'] || 'default';
             const color = colors[element] || colors.default;
-
             const material = new THREE.MeshBasicMaterial({ color });
             const geometry = new THREE.SphereGeometry(0.2, 32, 32);
             const sphere = new THREE.Mesh(geometry, material);
@@ -38,7 +51,7 @@ const AtomVisualizer = ({ positions, elements }) => {
             scene.add(sphere);
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement); // Correctly reference camera here
+        const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableZoom = false;
 
         mountRef.current.addEventListener('mouseenter', () => {
@@ -57,9 +70,8 @@ const AtomVisualizer = ({ positions, elements }) => {
         animate();
 
         return () => {
-            if (mountRef.current) {
-                mountRef.current.removeChild(renderer.domElement);
-            }
+            window.removeEventListener('resize', resizeRenderer);
+            mountRef.current.removeChild(renderer.domElement);
             renderer.dispose();
             scene.children.forEach(child => {
                 if (child.geometry) child.geometry.dispose();
@@ -68,7 +80,7 @@ const AtomVisualizer = ({ positions, elements }) => {
             });
             controls.dispose();
         };
-    }, [positions, elements]);
+    }, [positions, elements]);  // Adjust dependencies as needed
 
     const handleZoomIn = () => {
         cameraRef.current.fov *= 0.9;
@@ -87,11 +99,12 @@ const AtomVisualizer = ({ positions, elements }) => {
     };
 
     return (
-        <div className="viewer-container" ref={mountRef}>
-            <button onClick={handleZoomIn}>Zoom In</button>
+        <div className="viewer-container" ref={mountRef} style={{ width: '50%', height: '50%', position: 'relative' }}>
+            {/* <button onClick={handleZoomIn}>Zoom In</button>
             <button onClick={handleZoomOut}>Zoom Out</button>
-            <button onClick={handleResetView}>Reset View</button>
+            <button onClick={handleResetView}>Reset View</button> */}
         </div>
+         
     );
 };
 
