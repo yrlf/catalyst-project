@@ -3,84 +3,89 @@ import axios from 'axios';
 
 function MaterialUpload() {
   const [file, setFile] = useState(null);
+  const [materialId, setMaterialId] = useState("");
+  const [name, setName] = useState("");
+  const [prettyFormula, setPrettyFormula] = useState("");
+  const [elements, setElements] = useState("");
+  const [bandGap, setBandGap] = useState("");
+  const [structure, setStructure] = useState("");
   const [description, setDescription] = useState("");
-  const [additionalFields, setAdditionalFields] = useState([]);
+  const [poscarId, setPoscarId] = useState("");
 
   const handleFileChange = event => {
     setFile(event.target.files[0]);
   };
 
-  const handleDescriptionChange = event => {
-    setDescription(event.target.value);
-  };
+  const uploadMaterialDetails = async (currentPoscarId) => {
+    const materialData = {
+      id: materialId,
+      name: name,
+      prettyFormula: prettyFormula,
+      elements: elements,
+      bandGap: bandGap,
+      structure: structure,
+      description: description,
+      poscar: currentPoscarId
+    };
 
-  const handleAddField = () => {
-    setAdditionalFields([...additionalFields, { key: '', value: '' }]);
-  };
-
-  const handleFieldChange = (index, side, value) => {
-    const newFields = additionalFields.map((field, i) => {
-      if (i === index) {
-        return { ...field, [side]: value };
-      }
-      return field;
-    });
-    setAdditionalFields(newFields);
+    try {
+      await axios.post('http://127.0.0.1:8083/api/upload', materialData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      alert('Material Details Uploaded Successfully');
+    } catch (error) {
+      console.error('Error uploading material details:', error);
+      alert('Error uploading material details');
+    }
   };
 
   const handleSubmit = async event => {
     event.preventDefault();
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('description', description);
-    additionalFields.forEach(field => {
-      if (field.key && field.value) {
-        formData.append(field.key, field.value);
-      }
-    });
 
-    try {
-      const response = await axios.post('http://localhost:5000/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+    if (file) {
+      const fileFormData = new FormData();
+      fileFormData.append('file', file);
+
+      try {
+        const fileResponse = await axios.post('http://127.0.0.1:8083/api/uploadPOSCAR', fileFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if (fileResponse.data && fileResponse.data.data && fileResponse.data.data.id) {
+          const poscarId = fileResponse.data.data.id;
+          setPoscarId(poscarId);
+          uploadMaterialDetails(poscarId); // Upload material details after POSCAR is uploaded
+          alert('POSCAR File uploaded successfully');
+        } else {
+          alert('Failed to upload POSCAR file or no ID returned.');
         }
-      });
-      alert('File Uploaded Successfully');
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Error uploading file');
+
+      } catch (error) {
+        console.error('Error uploading POSCAR file:', error);
+        alert('Error uploading POSCAR file');
+      }
+    } else {
+      uploadMaterialDetails(poscarId); // If no POSCAR file, upload material details with current poscarId (may be empty)
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <label>
-        File:
+        POSCAR File (optional):
         <input type="file" onChange={handleFileChange} />
       </label>
-      <br />
-      <label>
-        Description:
-        <input type="text" value={description} onChange={handleDescriptionChange} />
-      </label>
-      {additionalFields.map((field, index) => (
-        <div key={index}>
-          <input
-            type="text"
-            placeholder="Property name"
-            value={field.key}
-            onChange={(e) => handleFieldChange(index, 'key', e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Value"
-            value={field.value}
-            onChange={(e) => handleFieldChange(index, 'value', e.target.value)}
-          />
-        </div>
-      ))}
-      <button type="button" onClick={handleAddField}>Add Field</button>
-      <br />
+      <input type="text" placeholder="Material ID" value={materialId} onChange={e => setMaterialId(e.target.value)} />
+      <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+      <input type="text" placeholder="Pretty Formula" value={prettyFormula} onChange={e => setPrettyFormula(e.target.value)} />
+      <input type="text" placeholder="Elements" value={elements} onChange={e => setElements(e.target.value)} />
+      <input type="text" placeholder="Band Gap (eV)" value={bandGap} onChange={e => setBandGap(e.target.value)} />
+      <input type="text" placeholder="Structure" value={structure} onChange={e => setStructure(e.target.value)} />
+      <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
       <button type="submit">Upload</button>
     </form>
   );

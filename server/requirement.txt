@@ -1,0 +1,8 @@
+asgiref==3.8.1
+Brotli @ file:///private/tmp/python-brotli-20231117-5377-1dmlxkj/Brotli-1.1.0
+certifi @ file:///private/tmp/python-certifi-20231117-4919-2f0o9m/certifi-2023.11.17
+Django==5.0.4
+django-cors-headers==4.3.1
+mutagen @ file:///private/tmp/python-mutagen-20231008-5554-1csby1/mutagen-1.47.0
+numpy @ file:///private/tmp/numpy-20240108-5731-uciys2/numpy-1.26.3
+sqlparse==0.5.0

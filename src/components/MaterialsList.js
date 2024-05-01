@@ -1,30 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+
+// Setting the base URL for all axios requests
 axios.defaults.baseURL = 'http://127.0.0.1:8083';
 
 function MaterialsList() {
-  const [materials, setMaterials] = useState([]);  // 确保初始状态为数组
+  const [materials, setMaterials] = useState([]);  // Initialize materials as an empty array
 
-  useEffect(() => {
-    fetchMaterials();
-  }, []);
+  // Function to fetch materials data from the API
+  // const fetchMaterials = () => {
+  //   axios.get('/api/list')
+  //     .then((res) => {
+  //       console.log("API Response:", res.data); // Logging the API response
+  //       if (Array.isArray(res.data.data)) {  // Check if the received data is an array
+  //         setMaterials(res.data.data);  // Update the materials state with the fetched data
+  //       } else {
+  //         console.error('Data property is not an array:', res.data.data);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error('Error fetching data:', err);  // Log any errors during the fetch
+  //     });
+  // };
 
   const fetchMaterials = () => {
     axios.get('/api/list')
       .then((res) => {
-        if (Array.isArray(res.data.data)) {  // 现在我们从res.data.data中获取数组
-          setMaterials(res.data.data);  // 将数据设置为res.data.data
+        console.log("API Response:", res.data); // Logging the API response
+        if (Array.isArray(res.data.data)) {  // Check if the received data is an array
+          setMaterials(res.data.data);  // Update the materials state with the fetched data
         } else {
-          console.error('Data property is not an array:', res.data.data);
+          console.error('Data property is not an array:', res.data);
         }
       })
       .catch((err) => {
-        console.error('Error fetching data:', err);
+        console.error('Error fetching data:', err);  // Log any errors during the fetch
       });
-  };
-  
+};
 
+  // useEffect hook to fetch materials data when the component mounts
+  useEffect(() => {
+    fetchMaterials();
+  }, []);
+
+  // Render the component
   return (
     <div>
       <h2>Materials Database</h2>
@@ -39,10 +59,10 @@ function MaterialsList() {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(materials) ? materials.map((material) => (  // 安全地调用 .map
+          {materials.length > 0 ? materials.map((material) => (
             <tr key={material.id}>
               <td><Link to={`/material/${material.id}`}>{material.id}</Link></td>
-              <td>{material.formulaPretty}</td>
+              <td>{material.prettyFormula}</td>
               <td>{material.elements}</td>
               <td>{material.bandGap}</td>
               <td>{material.structure}</td>

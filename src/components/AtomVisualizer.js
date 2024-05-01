@@ -13,90 +13,62 @@ const AtomVisualizer = ({ positions, elements }) => {
         }
 
         const scene = new THREE.Scene();
-        const camera = cameraRef.current;
-        camera.position.z = 10;
+        const camera = cameraRef.current; // Use camera from the ref
+        camera.position.z = 50; // Adjust this value to ensure all atoms are visible initially
 
         const renderer = new THREE.WebGLRenderer({ alpha: true });
         renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
-        renderer.setClearColor(0x000000, 0);
         mountRef.current.appendChild(renderer.domElement);
 
         const colors = {
             Cu: 0xff0000,
             C: 0x00ff00,
-            O: 0x0000ff
+            O: 0x0000ff,
+            default: 0xaaaaaa  // Default color for elements not listed,
         };
 
-        const geometries = [];
-        const materials = [];
-        const spheres = [];
-
         positions.forEach((pos, index) => {
-            const element = elements[index];
-            const color = colors[element] || 0xaaaaaa;
+            const element = pos['element'];
+            const color = colors[element] || colors.default;
+
             const material = new THREE.MeshBasicMaterial({ color });
             const geometry = new THREE.SphereGeometry(0.2, 32, 32);
             const sphere = new THREE.Mesh(geometry, material);
-            sphere.position.copy(pos);
+            sphere.position.set(pos.x, pos.y, pos.z);
             scene.add(sphere);
-            geometries.push(geometry);
-            materials.push(material);
-            spheres.push(sphere);
         });
 
-        const maxBondLength = 3.5; // Define a maximum bond length
-        positions.forEach((pos, i) => {
-            positions.slice(i + 1).forEach((otherPos, j) => {
-                if (pos.distanceTo(otherPos) < maxBondLength) {
-                    const bondGeometry = new THREE.BufferGeometry().setFromPoints([pos, otherPos]);
-                    const bondMaterial = new THREE.LineBasicMaterial({ color: 0x999999 });
-                    const bond = new THREE.Line(bondGeometry, bondMaterial);
-                    scene.add(bond);
-                    geometries.push(bondGeometry);
-                    materials.push(bondMaterial);
-                }
-            });
+        const controls = new OrbitControls(camera, renderer.domElement); // Correctly reference camera here
+        controls.enableZoom = false;
+
+        mountRef.current.addEventListener('mouseenter', () => {
+            controls.enableZoom = true;
         });
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.update();
+        mountRef.current.addEventListener('mouseleave', () => {
+            controls.enableZoom = false;
+        });
 
         const animate = () => {
             requestAnimationFrame(animate);
+            controls.update();
             renderer.render(scene, camera);
         };
         animate();
 
-        // return () => {
-        //     mountRef.current.removeChild(renderer.domElement);
-        //     renderer.dispose();
-        //     scene.children.forEach(child => scene.remove(child));
-        //     geometries.forEach(geom => geom.dispose());
-        //     materials.forEach(mat => mat.dispose());
-        //     controls.dispose();
-        // };
         return () => {
-            if (mountRef.current) {  // 确保引用仍然指向 DOM 元素
+            if (mountRef.current) {
                 mountRef.current.removeChild(renderer.domElement);
             }
             renderer.dispose();
             scene.children.forEach(child => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) child.material.dispose();
                 scene.remove(child);
-                if (child.geometry) {
-                    child.geometry.dispose();
-                }
-                if (child.material) {
-                    if (child.material instanceof Array) {
-                        child.material.forEach(material => material.dispose());
-                    } else {
-                        child.material.dispose();
-                    }
-                }
             });
             controls.dispose();
         };
-        
-    }, [positions, elements]); // Ensure to include proper dependencies or remove if not needed to run only once
+    }, [positions, elements]);
 
     const handleZoomIn = () => {
         cameraRef.current.fov *= 0.9;
@@ -116,12 +88,9 @@ const AtomVisualizer = ({ positions, elements }) => {
 
     return (
         <div className="viewer-container" ref={mountRef}>
-            <div className="viewer-buttons">
-                <button className="viewer-button" onClick={handleZoomIn}>Zoom In</button>
-                <button className="viewer-button" onClick={handleZoomOut}>Zoom Out</button>
-                <button className="viewer-button" onClick={handleResetView}>Reset View</button>
-            </div>
-            {/* ...Three.js canvas will be appended here */}
+            <button onClick={handleZoomIn}>Zoom In</button>
+            <button onClick={handleZoomOut}>Zoom Out</button>
+            <button onClick={handleResetView}>Reset View</button>
         </div>
     );
 };
