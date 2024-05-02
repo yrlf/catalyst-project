@@ -6,5 +6,5 @@ urlpatterns =[
     path('/detail', apps.detail, name='detail'),
     path('/upload', apps.upload, name='upload'),
     path('/uploadPOSCAR', apps.uploadPOSCAR, name='uploadPOSCAR'),
-    path('api/get_poscar', apps.get_poscar, name='get_poscar'),
+    path('/api/get_poscar', apps.get_poscar, name='get_poscar'),
 ]

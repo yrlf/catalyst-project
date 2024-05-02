@@ -1,10 +1,11 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
 import hashlib
 import json 
 from . import pymongo
 import time
 from bson import binary
+
 
 # def response(code: int, message:str, data: any=None):
 #     body = {'code': code, 'message': message, 'data':{}}
@@ -29,56 +30,47 @@ def response(code: int, message: str, data: any = None):
         body['data'] = data
     return HttpResponse(json.dumps(body, sort_keys=True, ensure_ascii=False))
 
-
-
-# list_data =[
-#     # add new: formulaPretty: "CS2", elements: "C, S", bandGap: 3.43, structure: "Orthorhombic"
-#     {"id":"1", "prettyFormula":"MoS2","elements": "Mo, S", "bandGap": 3.43, "structure": "Orthorhombic", "description":"Molybdenum Disulfide", "poscar":[]},
-#     {"id":"2", "prettyFormula":"CNT","elements": "C", "bandGap": -3.43, "structure": "Orthorhombic", "description":"Molybdenum Disulfide", "poscar":[]},
-#     {"id":"3", "prettyFormula":"MnO2","elements": "Mn, O", "bandGap": 2.43, "structure": "Orthorhombic", "description":"Molybdenum Disulfide", "poscar":[]},
-
-#     # {"id":"123", "name":"CNT-50", "description":"50% Carbon Nanotube", "poscar":[]},
-#     # {"id":"124", "name":"CNT-60", "description":"60% Carbon Nanotube", "poscar":[]},
-#     # {"id":"125", "name":"CNT-70", "description":"70% Carbon Nanotube", "poscar":[]},
-# ]
-
-@require_http_methods(["GET"])
-def list(request):
-    materials = []
-    data = pymongo.MongoDB.materials.find()
-    for d in data:
-        materials.append({
-            "id": str(d['_id']),  # 确保 ID 是字符串格式
-            "prettyFormula": d['prettyFormula'],
-            "elements": d['elements'],
-            "bandGap": d['bandGap'],
-            "structure": d['structure'],
-            "description": d['description'],
-            "poscar": d['poscar']
-        })
-    return response(0, "ok", materials)
+db = pymongo.MongoDB
 
 # @require_http_methods(["GET"])
 # def list(request):
 #     materials = []
-#     data = pymongo.MongoDB.materials.find({}, {
-#         "id": "testdb-9"
-#     })
-#     print("list API called ")
+#     data = pymongo.MongoDB.materials.find()
 #     for d in data:
-#         print(d)
-#         materials.append(
-#             {
-#                 "id": d['id'],
-#                 "prettyFormula": d['prettyFormula'],
-#                 "elements": d['elements'],
-#                 "bandGap": d['bandGap'],
-#                 "structure": d['structure'],
-#                 "description": d['description'],
-#                 "poscar": d['poscar']
-#             }
-#         )
+#         material = {key: str(value) if key == '_id' else value for key, value in d.items()}
+#         materials.append(material)
+#     return JsonResponse({"status": 0, "message": "ok", "data": materials})
 
+@require_http_methods(["GET"])
+def list(request):
+    materials = []
+    data = db.materials.find()  # Fetch data from MongoDB
+    for d in data:
+        # Extract only the needed fields and include both _id and material_id
+        material = {
+            '_id': str(d['_id']),  # Convert ObjectId to string for JSON serialization
+            'material_id': d.get('material_id', 'N/A'),  # Treat material_id as a normal feature
+            'formula_pretty': d.get('formula_pretty', 'N/A'),  # Use get to avoid KeyError if the field is missing
+            'band_gap': d.get('band_gap', 'N/A'),  # Provide default values if key does not exist
+            'energy_above_hull': d.get('energy_above_hull', 'N/A')
+        }
+        materials.append(material)
+    return JsonResponse({"status": 0, "message": "ok", "data": materials})
+
+# @require_http_methods(["GET"])
+# def list(request):
+#     materials = []
+#     data = pymongo.MongoDB.materials.find()
+#     for d in data:
+#         materials.append({
+#             "id": str(d['_id']),  # 确保 ID 是字符串格式
+#             "prettyFormula": d['prettyFormula'],
+#             "elements": d['elements'],
+#             "bandGap": d['bandGap'],
+#             "structure": d['structure'],
+#             "description": d['description'],
+#             "poscar": d['poscar']
+#         })
 #     return response(0, "ok", materials)
 
 def findDataById(list, id):
@@ -99,30 +91,60 @@ def findDataById(list, id):
 
 def detail(request):
     id = request.GET.get("id", "")
+    print("Requested material_id:", id)
     if id == "":
-        return response(404, "ID not provided")
+        return JsonResponse({'status': 404, 'message': 'Material ID not provided'}, status=404)
 
-    material = pymongo.MongoDB.materials.find_one({"_id": ObjectId(id)})
+    # Query using 'material_id' instead of MongoDB '_id'
+    material = db.materials.find_one({"material_id": id})
     if material is None:
-        return response(404, "Material not found")
+        return JsonResponse({'status': 404, 'message': 'Material not found'}, status=404)
 
     poscar_id = material.get("poscar")
     poscar_content = ""
     if poscar_id:
-        poscar_file = pymongo.MongoDB.poscar.find_one({"_id": ObjectId(poscar_id)})
+        # Assume poscar_id is also a string and not an ObjectId
+        poscar_file = db.poscar.find_one({"_id": ObjectId(poscar_id)})
         if poscar_file:
-            poscar_content = poscar_file.get('body', '').decode('utf-8')  # 确保内容被正确解码为字符串
+            poscar_content = poscar_file.get('body', '').decode('utf-8')  # Ensure content is correctly decoded to string
 
     material_data = {
-        "prettyFormula": material['prettyFormula'],
-        "elements": material['elements'],
-        "bandGap": material['bandGap'],
-        "structure": material['structure'],
-        "description": material['description'],
-        "poscarContent": poscar_content  # 添加POSCAR内容到返回的数据中
+        "prettyFormula": material.get('formula_pretty', 'N/A'),
+        "elements": material.get('elements', 'N/A'),
+        "bandGap": material.get('band_gap', 'N/A'),
+        "structure": material.get('structure', 'N/A'),
+        "description": material.get('description', 'N/A'),
+        "poscarContent": poscar_content  # Include POSCAR content in the returned data
     }
+
+    return JsonResponse({'status': 0, 'message': 'ok', 'data': material_data})
+
+# def detail(request):
+#     id = request.GET.get("id", "")
+#     if id == "":
+#         return response(404, "ID not provided")
+
+#     material = pymongo.MongoDB.materials.find_one({"_id": ObjectId(id)})
+#     if material is None:
+#         return response(404, "Material not found")
+
+#     poscar_id = material.get("poscar")
+#     poscar_content = ""
+#     if poscar_id:
+#         poscar_file = pymongo.MongoDB.poscar.find_one({"_id": ObjectId(poscar_id)})
+#         if poscar_file:
+#             poscar_content = poscar_file.get('body', '').decode('utf-8')  # 确保内容被正确解码为字符串
+
+#     material_data = {
+#         "prettyFormula": material['prettyFormula'],
+#         "elements": material['elements'],
+#         "bandGap": material['bandGap'],
+#         "structure": material['structure'],
+#         "description": material['description'],
+#         "poscarContent": poscar_content  # 添加POSCAR内容到返回的数据中
+#     }
     
-    return response(0, "ok", material_data)
+#     return response(0, "ok", material_data)
 
 
 # def detail(request):
