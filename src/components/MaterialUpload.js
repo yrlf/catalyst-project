@@ -40,44 +40,13 @@ function MaterialUpload() {
     }
   };
 
-  // const handleSubmit = async event => {
-  //   event.preventDefault();
-
-  //   if (file) {
-  //     const fileFormData = new FormData();
-  //     fileFormData.append('file', file);
-
-  //     try {
-  //       const fileResponse = await axios.post('http://127.0.0.1:8083/api/uploadPOSCAR', fileFormData, {
-  //         headers: {
-  //           'Content-Type': 'multipart/form-data'
-  //         }
-  //       });
-
-  //       if (fileResponse.data && fileResponse.data.data && fileResponse.data.data.id) {
-  //         const poscarId = fileResponse.data.data.id;
-  //         setPoscarId(poscarId);
-  //         uploadMaterialDetails(poscarId); // Upload material details after POSCAR is uploaded
-  //         alert('POSCAR File uploaded successfully');
-  //       } else {
-  //         alert('Failed to upload POSCAR file or no ID returned.');
-  //       }
-
-  //     } catch (error) {
-  //       console.error('Error uploading POSCAR file:', error);
-  //       alert('Error uploading POSCAR file');
-  //     }
-  //   } else {
-  //     uploadMaterialDetails(poscarId); // If no POSCAR file, upload material details with current poscarId (may be empty)
-  //   }
-  // };
   const handleSubmit = async event => {
     event.preventDefault();
   
     if (file) {
       const fileFormData = new FormData();
       fileFormData.append('file', file);
-      fileFormData.append('material_id', materialId);  // Add material_id to FormData
+      fileFormData.append('material_id', materialId);
 
       try {
         const fileResponse = await axios.post('http://127.0.0.1:8083/api/uploadPOSCAR', fileFormData, {
@@ -89,7 +58,7 @@ function MaterialUpload() {
         if (fileResponse.data && fileResponse.data.data && fileResponse.data.data.id) {
           const poscarId = fileResponse.data.data.id;
           setPoscarId(poscarId);
-          uploadMaterialDetails(poscarId); // Upload material details after POSCAR is uploaded
+          uploadMaterialDetails(poscarId);
           alert('POSCAR File uploaded successfully');
         } else {
           alert('Failed to upload POSCAR file or no ID returned.');
@@ -100,25 +69,51 @@ function MaterialUpload() {
         alert('Error uploading POSCAR file');
       }
     } else {
-      uploadMaterialDetails(poscarId); // If no POSCAR file, upload material details with current poscarId (may be empty)
+      uploadMaterialDetails(poscarId);
     }
   };
-  
+
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        POSCAR File (optional):
-        <input type="file" onChange={handleFileChange} />
-      </label>
-      <input type="text" placeholder="Material ID" value={materialId} onChange={e => setMaterialId(e.target.value)} />
-      <input type="text" placeholder="Pretty Formula" value={prettyFormula} onChange={e => setPrettyFormula(e.target.value)} />
-      <input type="text" placeholder="Elements" value={elements} onChange={e => setElements(e.target.value)} />
-      <input type="text" placeholder="Band Gap (eV)" value={bandGap} onChange={e => setBandGap(e.target.value)} />
-      <input type="text" placeholder="Structure" value={structure} onChange={e => setStructure(e.target.value)} />
-      <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
-      <button type="submit">Upload</button>
-    </form>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+        
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Material ID:</label>
+          <input type="text" placeholder="Material ID" value={materialId} onChange={e => setMaterialId(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Pretty Formula:</label>
+          <input type="text" placeholder="Pretty Formula" value={prettyFormula} onChange={e => setPrettyFormula(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Elements:</label>
+          <input type="text" placeholder="Elements" value={elements} onChange={e => setElements(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Band Gap (eV):</label>
+          <input type="text" placeholder="Band Gap (eV)" value={bandGap} onChange={e => setBandGap(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Structure:</label>
+          <input type="text" placeholder="Structure" value={structure} onChange={e => setStructure(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Description:</label>
+          <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
+        </div>
+        <div>
+          <label style={{ fontWeight: 'bold' }}>
+            POSCAR File (optional):
+            <input type="file" onChange={handleFileChange} />
+          </label>
+        </div>
+        <div>
+          <button type="submit">Upload</button>
+        </div>
+      </form>
+    </div>
   );
+  
 }
 
 export default MaterialUpload;

@@ -34,11 +34,46 @@ const AtomVisualizer = ({ positions, elements }) => {
         window.addEventListener('resize', resizeRenderer);
 
         const colors = {
-            Cu: 0xff0000,
-            C: 0x00ff00,
-            O: 0x0000ff,
-            default: 0xaaaaaa  // Default color for elements not listed
+            H: 0xFFFFFF, // Hydrogen - White
+            He: 0xD9FFFF, // Helium - Pale Cyan
+            Li: 0xCC80FF, // Lithium - Pale Purple
+            Be: 0xC2FF00, // Beryllium - Light Green
+            B: 0xFFB5B5, // Boron - Light Pink
+            C: 0x0055FF, // Carbon - Deep Blue
+            N: 0x3050F8, // Nitrogen - Dark Blue
+            O: 0xFF0D0D, // Oxygen - Red
+            F: 0x90E050, // Fluorine - Light Green
+            Ne: 0xB3E3F5, // Neon - Light Blue
+            Na: 0xAB5CF2, // Sodium - Violet
+            Mg: 0x8AFF00, // Magnesium - Bright Green
+            Al: 0xBFA6A6, // Aluminum - Rosy
+            Si: 0xF0C8A0, // Silicon - Light Brown
+            P: 0xFF8000, // Phosphorus - Orange
+            S: 0xFFFF30, // Sulfur - Yellow
+            Cl: 0x1FF01F, // Chlorine - Bright Green
+            Ar: 0x80D1E3, // Argon - Pale Blue
+            K: 0x8F40D4, // Potassium - Purple
+            Ca: 0x3DFF00, // Calcium - Bright Green
+            Sc: 0xE6E6E6, // Scandium - Silver
+            Ti: 0xBFC2C7, // Titanium - Silver
+            V: 0xA6A6AB, // Vanadium - Steel Grey
+            Cr: 0x8A99C7, // Chromium - Pale Blue
+            Mn: 0x9C7AC7, // Manganese - Pale Purple
+            Fe: 0xE06633, // Iron - Rust
+            Co: 0xF090A0, // Cobalt - Pink
+            Ni: 0x50D050, // Nickel - Light Green
+            Cu: 0xC88033, // Copper - Copper
+            Zn: 0x7D80B0, // Zinc - Light Gray
+            Ga: 0xC28F8F, // Gallium - Rose
+            Ge: 0x668F8F, // Germanium - Blue-Green
+            As: 0xBD80E3, // Arsenic - Light Purple
+            Se: 0xFFA100, // Selenium - Orange
+            Br: 0xA62929, // Bromine - Dark Red
+            Kr: 0x5CB8D1, // Krypton - Light Blue
+            default: 0xAAAAAA  // Default color for elements not listed
         };
+        
+        
 
         positions.forEach((pos, index) => {
             const element = pos['element']|| 'default';

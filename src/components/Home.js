@@ -49,34 +49,12 @@ function MaterialsList() {
 
   return (
     <div>
-      <h2>Materials Database</h2>
-      <SearchBar onSearch={handleSearch} />
-      <table>
-        <thead>
-          <tr>
-            <th>Material ID</th>
-            <th>Formula Pretty</th>
-            <th>Elements</th>
-            <th>Band Gap (eV)</th>
-            <th>Energy Above Hull</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentMaterials.length > 0 ? currentMaterials.map((material, index) => (
-            <tr key={index}>
-              <td>{material.material_id !== 'N/A' ? <Link to={`/detail/${material.material_id}`}>{material.material_id}</Link> : 'N/A'}</td>
-              <td>{material.formula_pretty}</td>
-              <td>{material.element}</td>
-              <td>{material.band_gap !== 'N/A' ? parseFloat(material.band_gap).toFixed(4) : 'N/A'}</td>
-              <td>{material.energy_above_hull !== 'N/A' ? parseFloat(material.energy_above_hull).toFixed(4) : 'N/A'}</td>
-            </tr>
-          )) : <tr><td colSpan="5">No data available</td></tr>}
-        </tbody>
-      </table>
-      <div>
-        <button onClick={goToPreviousPage} disabled={currentPage === 0}>Previous</button>
-        <button onClick={goToNextPage} disabled={currentPage >= Math.ceil(materials.length / materialsPerPage) - 1}>Next</button>
-      </div>
+      <h2>Metal-free Catalyst Material Database</h2>
+      This should be the first open database in metal-free catalyst field. 
+      It's hosted by University of New South Wales. 
+      You are allowed to use any data provided in present website, but you should cite this website.
+
+
     </div>
   );
 }
