@@ -56,7 +56,7 @@ function MaterialsList() {
         <tbody>
           {materials.length > 0 ? materials.map((material, index) => (
             <tr key={index}>
-              <td>{material.material_id !== 'N/A' ? <Link to={`/material/${material.material_id}`}>{material.material_id}</Link> : 'N/A'}</td>
+              <td>{material.material_id !== 'N/A' ? <Link to={`/detail/${material.material_id}`}>{material.material_id}</Link> : 'N/A'}</td>
               <td>{material.formula_pretty}</td>
               <td>{material.elements}</td>
               <td>{material.bandGap}</td>

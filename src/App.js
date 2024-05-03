@@ -16,7 +16,7 @@ function App() {
       <SearchBar />
       <Routes>
         <Route path="/materials" element={<MaterialsList />} />
-        <Route path="/material/:materialId" element={<MaterialPage />} />
+        <Route path="/detail/:materialId" element={<MaterialPage />} />
         <Route path="/upload" element={<MaterialUpload />} />
         {/* Uncomment these if needed later */}
         {/* <Route path="/about" element={<About />} />

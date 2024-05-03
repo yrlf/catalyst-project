@@ -79,176 +79,160 @@ def findDataById(list, id):
             return list[i]
     return None
 
-# def detail(request):
-#     id = request.GET.get("id", "")
-#     if id == "":
-#         return response(404, "ID not provided")
-#     data = pymongo.MongoDB.materials.find_one({"_id": ObjectId(id)})
-#     if data is None:
-#         return response(404, "Data not found")
-#     return response(0, "ok", data)
+import logging
 
+logger = logging.getLogger(__name__)
 
 def detail(request):
-    id = request.GET.get("id", "")
-    print("Requested material_id:", id)
-    if id == "":
+    print("details!")
+    material_id = request.GET.get("id", "")
+    print("Requested material_id:", material_id)
+    logger.debug(f"Requested material_id: {material_id}")
+    if not material_id:
         return JsonResponse({'status': 404, 'message': 'Material ID not provided'}, status=404)
 
-    # Query using 'material_id' instead of MongoDB '_id'
-    material = db.materials.find_one({"material_id": id})
-    if material is None:
-        return JsonResponse({'status': 404, 'message': 'Material not found'}, status=404)
+    material_data = {}  # Initialize material_data to an empty dictionary
 
-    poscar_id = material.get("poscar")
-    poscar_content = ""
-    if poscar_id:
-        # Assume poscar_id is also a string and not an ObjectId
-        poscar_file = db.poscar.find_one({"_id": ObjectId(poscar_id)})
-        if poscar_file:
-            poscar_content = poscar_file.get('body', '').decode('utf-8')  # Ensure content is correctly decoded to string
+    try:
+        # Query using 'material_id' instead of MongoDB '_id'
+        material = db.materials.find_one({"material_id": material_id})
+        if material is None:
+            return JsonResponse({'status': 404, 'message': 'Material not found'}, status=404)
 
-    material_data = {
-        "prettyFormula": material.get('formula_pretty', 'N/A'),
-        "elements": material.get('elements', 'N/A'),
-        "bandGap": material.get('band_gap', 'N/A'),
-        "structure": material.get('structure', 'N/A'),
-        "description": material.get('description', 'N/A'),
-        "poscarContent": poscar_content  # Include POSCAR content in the returned data
-    }
+        poscar_id = material.get("poscar")
+        poscar_content = ""
+        if poscar_id:
+            poscar_file = db.poscar.find_one({"_id": ObjectId(poscar_id)})
+            if poscar_file:
+                if material.get('upload_from_page') == 1:
+                    poscar_content = poscar_file.get('body', '').decode('utf-8')
+                else:
+                    poscar_content = poscar_file.get('body', '')
+        material_data = {
+            "formula_pretty": material.get('formula_pretty', 'N/A'),
+            "elements": material.get('elements', 'N/A'),
+            "band_gap": material.get('band_gap', 'N/A'),
+            "structure": material.get('structure', 'N/A'),
+            "description": material.get('description', 'N/A'),
+            "poscarContent": poscar_content,
+            "poscarID": poscar_id
+        }
 
-    return JsonResponse({'status': 0, 'message': 'ok', 'data': material_data})
+        return JsonResponse({'status': 0, 'message': 'ok', 'data': material_data})
 
-# def detail(request):
-#     id = request.GET.get("id", "")
-#     if id == "":
-#         return response(404, "ID not provided")
+    except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
+        return JsonResponse({'status': 501, 'message': str(material_data)}, status=501)
 
-#     material = pymongo.MongoDB.materials.find_one({"_id": ObjectId(id)})
-#     if material is None:
-#         return response(404, "Material not found")
-
-#     poscar_id = material.get("poscar")
-#     poscar_content = ""
-#     if poscar_id:
-#         poscar_file = pymongo.MongoDB.poscar.find_one({"_id": ObjectId(poscar_id)})
-#         if poscar_file:
-#             poscar_content = poscar_file.get('body', '').decode('utf-8')  # 确保内容被正确解码为字符串
-
-#     material_data = {
-#         "prettyFormula": material['prettyFormula'],
-#         "elements": material['elements'],
-#         "bandGap": material['bandGap'],
-#         "structure": material['structure'],
-#         "description": material['description'],
-#         "poscarContent": poscar_content  # 添加POSCAR内容到返回的数据中
-#     }
-    
-#     return response(0, "ok", material_data)
-
-
-# def detail(request):
-#     id = request.GET.get("id", "")
-#     if id == "":
-#         return response(404, "ID not provided")
-#     data = findDataById(list_data, id)
-#     if data is None:
-#         return response(404, "Data not found")
-#     return response(0, "ok", data)
 
 poscar_files = []
 
 poscar = {}
 
-
-# id, md5, type, body: file
-
-# @require_http_methods("POST") # 必须写这个才能用request.FILES
-# def uploadPOSCAR(request):
-    
-#     f = request.FILES['file']
-
-#     body = f.read() # 具体文件内容
-#     md5 = hashlib.md5(body).hexdigest()
-#     typ = f.content_type
-
-#     data = {
-#         "md5": md5,
-#         "type": typ,
-#         "body": body
-#         # 如果是图片, 可以转为二进制存储:binary.Binary(body)
-#     }
-
-#     # 查找文件是否已经存在
-#     file = pymongo.MongoDB.poscar.find_one({"md5":md5})
-#     if file is not None:
-#         print("already exists", file['md5'])
-#         return response(0, "ok", {"id":file['md5']})
-        
-#     # 插入一条新的数据
-#     pymongo.MongoDB.poscar.insert_one({data})
-
-
-#     filename = "{}{}".format(f.name, time.time())
-#     # 加密文件名作为 id
-#     poscar['filename'] = hashlib.md5(filename.encode('utf-8')).hexdigest()
-#     poscar['data'] = f.read() # 具体文件内容
-#     poscar_files.append(poscar)
-#     print(poscar['filename'], poscar['data'])
-#     return response(0, "ok", {"id":poscar['filename']})
-
 from django.http import JsonResponse
 import traceback
+# @require_http_methods("POST")
+# def uploadPOSCAR(request):
+#     try:
+#         f = request.FILES['file']
+#         body = f.read()  # 具体文件内容
+#         md5 = hashlib.md5(body).hexdigest()
+#         typ = f.content_type
+
+#         # 查找文件是否已经存在
+#         file = pymongo.MongoDB.poscar.find_one({"md5": md5})
+#         if file:
+#             # 确保返回现有文件的 ID
+#             return response(0, "File already exists", {"id": str(file['_id'])})
+
+#         # 插入一条新的数据
+#         result = pymongo.MongoDB.poscar.insert_one({
+#             "md5": md5,
+#             "type": typ,
+#             "body": body
+#         })
+#         # 确保返回新插入文件的 ID
+#         return response(0, "File uploaded successfully", {"id": str(result.inserted_id)})
+#     except Exception as e:
+#         traceback.print_exc()
+#         return JsonResponse({'error': str(e)}, status=500)
+
+
+
+# @require_http_methods("POST")
+# def upload(request):
+#     param = json.loads(request.body)
+
+#     if not param:
+#         return response(404, "No data provided")
+
+#     data = {
+#         "material_id": param['material_id'],
+
+#         "formula_pretty": param['formula_pretty'],
+#         "elements": param['elements'],
+#         "bandGap": param['bandGap'],
+#         "structure": param['structure'],
+#         "description": param['description'],
+#         "poscar": param.get('poscar'),  # 这里 'poscar' 应该是文件上传后返回的 ID
+#         "time": int(time.time())
+#     }
+
+#     pymongo.MongoDB.materials.insert_one(data)
+#     return response(0, "Material uploaded successfully", {"id": param['material_id']})
+
+
+
 @require_http_methods("POST")
 def uploadPOSCAR(request):
     try:
         f = request.FILES['file']
-        body = f.read()  # 具体文件内容
+        body = f.read()  # Actual file content
         md5 = hashlib.md5(body).hexdigest()
         typ = f.content_type
 
-        # 查找文件是否已经存在
+        # Check if the file already exists
         file = pymongo.MongoDB.poscar.find_one({"md5": md5})
         if file:
-            # 确保返回现有文件的 ID
+            # Ensure the existing file's ID is returned
             return response(0, "File already exists", {"id": str(file['_id'])})
 
-        # 插入一条新的数据
+        # Insert a new record
         result = pymongo.MongoDB.poscar.insert_one({
             "md5": md5,
             "type": typ,
-            "body": binary.Binary(body)
+            "body": body
         })
-        # 确保返回新插入文件的 ID
+        # Ensure the new file's ID is returned
         return response(0, "File uploaded successfully", {"id": str(result.inserted_id)})
     except Exception as e:
-        traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
-
-
 
 @require_http_methods("POST")
 def upload(request):
-    param = json.loads(request.body)
+    try:
+        param = json.loads(request.body)
 
-    if not param:
-        return response(404, "No data provided")
+        if not param:
+            return response(404, "No data provided")
 
-    # 创建材料记录时包括 poscar 文件的 ID
-    data = {
-        "id": param['id'],
-        "name": param['name'],
-        "prettyFormula": param['prettyFormula'],
-        "elements": param['elements'],
-        "bandGap": param['bandGap'],
-        "structure": param['structure'],
-        "description": param['description'],
-        "poscar": param.get('poscar'),  # 这里 'poscar' 应该是文件上传后返回的 ID
-        "time": int(time.time())
-    }
+        current_time = int(time.time())
+        data = {
+            "material_id": param['material_id'],
+            "formula_pretty": param['formula_pretty'],
+            "elements": param['elements'],
+            "bandGap": param['bandGap'],
+            "structure": param['structure'],
+            "description": param['description'],
+            "poscar": param.get('poscar'),  # This should be the ID returned after file upload
+            "time": current_time,
+            'upload_from_page': 1 if param.get('upload_from_page') else 0,
+        }
 
-    pymongo.MongoDB.materials.insert_one(data)
-    return response(0, "Material uploaded successfully", {"id": param['id']})
+        pymongo.MongoDB.materials.insert_one(data)
+        return response(0, "Material uploaded successfully", {"id": param['material_id']})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @require_http_methods(["GET"])
 def get_poscar(request):
