@@ -1,27 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 function SearchBar({ onSearch }) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    const timerId = setTimeout(() => {
-      onSearch(searchTerm);
-    }, 500); // Debounce delay to reduce frequent API calls
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onSearch(searchTerm);
+  };
 
-    return () => clearTimeout(timerId);
-  }, [searchTerm, onSearch]);
-
-  const handleSearch = (event) => {
+  const handleChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
+  const handleClear = () => {
+    setSearchTerm('');  // 清空搜索框
+    onSearch('');  // 可以选择是否在清空时进行搜索
+  };
+
   return (
-    <input
-      type="text"
-      placeholder="Search materials..."
-      value={searchTerm}
-      onChange={handleSearch}
-    />
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Search materials..."
+        value={searchTerm}
+        onChange={handleChange}
+      />
+      <button type="submit">Search</button>
+      <button type="button" onClick={handleClear}>Clear</button>  
+    </form>
   );
 }
 
