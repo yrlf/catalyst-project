@@ -1,0 +1,12 @@
+.viewer-container {
+    position: relative;
+}
+
+.controls-container {
+    position: absolute;
+    bottom: 10px; /* Adjust this value as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px; /* Spacing between buttons */
+}

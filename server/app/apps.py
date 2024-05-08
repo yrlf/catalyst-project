@@ -6,7 +6,6 @@ from . import pymongo
 import time
 from bson import binary
 
-
 # def response(code: int, message:str, data: any=None):
 #     body = {'code': code, 'message': message, 'data':{}}
 #     if data is not None:
@@ -36,11 +35,25 @@ db = pymongo.MongoDB
 
 def serialize_material(material):
     # 定义一个帮助函数来处理每个材料的数据转换
+    ele = material.get("elements", "N/A")
+    # check and remove [ and ]
+    if ele:
+        if ele[0] == '[':
+            ele = ele[1:]
+        if ele[-1] == ']':
+            ele = ele[:-1]
+        if "Element" in ele:
+            ele = ele.replace("Element", "")
+        
+
+    print(ele)
     serialized = {
         "_id": str(material["_id"]),  # ObjectId转字符串
         "material_id": material.get("material_id", "N/A"),
         "formula_pretty": material.get("formula_pretty", "N/A"),
-        "elements": material.get("elements", "N/A"),
+        # "elements": material.get("elements", "N/A"),
+        "elements": ele,
+
         "band_gap": material.get("band_gap", "N/A"),
         "energy_above_hull": material.get("energy_above_hull", "N/A"),
         # 添加更多字段按需要

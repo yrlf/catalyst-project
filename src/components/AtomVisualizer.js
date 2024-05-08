@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import './AtomVisualizer.css';
 
 const AtomVisualizer = ({ positions, elements }) => {
     const mountRef = useRef(null);
@@ -136,9 +137,11 @@ const AtomVisualizer = ({ positions, elements }) => {
 
     return (
         <div className="viewer-container" ref={mountRef} style={{ width: '50%', height: '50%', position: 'relative' }}>
-            <button onClick={handleZoomIn}>Zoom In</button>
-            <button onClick={handleZoomOut}>Zoom Out</button>
-            <button onClick={handleResetView}>Reset View</button>
+            <div className="controls-container">
+                <button onClick={handleZoomIn}>Zoom In</button>
+                <button onClick={handleZoomOut}>Zoom Out</button>
+                <button onClick={handleResetView}>Reset View</button>
+            </div>
         </div>
     );
 };
