@@ -47,17 +47,18 @@ function MaterialPage() {
     }
     console.log(material);
     const properties = {
+        'Material ID': materialId,
         'Band Gap': material.band_gap,
-        'Pretty Formula': material.formula_pretty,
+        'Energy Above Hull': material.energy_above_hull,
+        // 'Pretty Formula': material.formula_pretty,
         'Elements': material.elements,
-        
         'Description': material.description,
         // 'POSCAR Content': material.poscarContent || 'No POSCAR content available.'
     };
 
     return (
         <div>
-            <h1>Material ID: {materialId}</h1>
+            <h1>Pretty Formula: {material.formula_pretty}</h1>
             <MaterialPropertiesPanel properties={properties} />
             {crystalData && (
                 <div>

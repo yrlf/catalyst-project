@@ -74,30 +74,30 @@ function MaterialUpload() {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+    <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'left', gap: '10px' }}>
         
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'left' }}>
           <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Material ID:</label>
           <input type="text" placeholder="Material ID" value={materialId} onChange={e => setMaterialId(e.target.value)} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'left' }}>
           <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Pretty Formula:</label>
-          <input type="text" placeholder="Pretty Formula" value={prettyFormula} onChange={e => setPrettyFormula(e.target.value)} />
+          <input type="text" placeholder="Pretty Formula (MUST *)" value={prettyFormula} onChange={e => setPrettyFormula(e.target.value)} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'left' }}>
           <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Elements:</label>
-          <input type="text" placeholder="Elements" value={elements} onChange={e => setElements(e.target.value)} />
+          <input type="text" placeholder="Elements in the structure, e.g., [Element Mn, Element O]" value={elements} onChange={e => setElements(e.target.value)} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'left' }}>
           <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Band Gap (eV):</label>
-          <input type="text" placeholder="Band Gap (eV)" value={bandGap} onChange={e => setBandGap(e.target.value)} />
+          <input type="text" placeholder="Band Gap (eV) e.g., 0.1234" value={bandGap} onChange={e => setBandGap(e.target.value)} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'left' }}>
           <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Structure:</label>
           <input type="text" placeholder="Structure" value={structure} onChange={e => setStructure(e.target.value)} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'left' }}>
           <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Description:</label>
           <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
         </div>

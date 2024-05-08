@@ -3,16 +3,13 @@ import React, { useState, useEffect } from 'react';
 function SearchBar({ onSearch }) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Debounce search term so that updates only happen every 500ms
   useEffect(() => {
     const timerId = setTimeout(() => {
-      if (onSearch) {
-        onSearch(searchTerm);
-      }
-    }, 500); // 500ms delay
+      onSearch(searchTerm);
+    }, 500); // Debounce delay to reduce frequent API calls
 
     return () => clearTimeout(timerId);
-  }, [searchTerm, onSearch]); // Re-run the effect only if searchTerm or onSearch changes
+  }, [searchTerm, onSearch]);
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);

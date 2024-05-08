@@ -32,46 +32,63 @@ def response(code: int, message: str, data: any = None):
 
 db = pymongo.MongoDB
 
+
+
+def serialize_material(material):
+    # 定义一个帮助函数来处理每个材料的数据转换
+    serialized = {
+        "_id": str(material["_id"]),  # ObjectId转字符串
+        "material_id": material.get("material_id", "N/A"),
+        "formula_pretty": material.get("formula_pretty", "N/A"),
+        "elements": material.get("elements", "N/A"),
+        "band_gap": material.get("band_gap", "N/A"),
+        "energy_above_hull": material.get("energy_above_hull", "N/A"),
+        # 添加更多字段按需要
+    }
+    # 如果有复杂类型数据需要特别处理，如日期、自定义对象等
+    # serialized['custom_field'] = custom_transform(material['custom_field'])
+    return serialized
+
+@require_http_methods(["GET"])
+def list_materials(request):
+    search_term = request.GET.get('search', '')
+    page = int(request.GET.get('page', '1')) - 1
+    per_page = int(request.GET.get('per_page', '10'))
+
+    query = {}
+    if search_term:
+        query = {'formula_pretty': {'$regex': search_term, '$options': 'i'}}
+
+    materials_cursor = db.materials.find(query).skip(page * per_page).limit(per_page)
+    materials_list = [serialize_material(material) for material in materials_cursor]  # 使用列表推导来转换每个材料
+    total = db.materials.count_documents(query)
+
+    return JsonResponse({
+        "status": 200,
+        "data": materials_list,
+        "total": total,
+        "page": page + 1,
+        "per_page": per_page
+    })
+
+
+
 # @require_http_methods(["GET"])
 # def list(request):
 #     materials = []
-#     data = pymongo.MongoDB.materials.find()
+#     data = db.materials.find()  # Fetch data from MongoDB
 #     for d in data:
-#         material = {key: str(value) if key == '_id' else value for key, value in d.items()}
+#         # Extract only the needed fields and include both _id and material_id
+#         material = {
+#             '_id': str(d['_id']),  # Convert ObjectId to string for JSON serialization
+#             'material_id': d.get('material_id', 'N/A'),  # Treat material_id as a normal feature
+#             'formula_pretty': d.get('formula_pretty', 'N/A'),  # Use get to avoid KeyError if the field is missing
+#             'band_gap': d.get('band_gap', 'N/A'),  # Provide default values if key does not exist
+#             'energy_above_hull': d.get('energy_above_hull', 'N/A')
+#         }
 #         materials.append(material)
 #     return JsonResponse({"status": 0, "message": "ok", "data": materials})
 
-@require_http_methods(["GET"])
-def list(request):
-    materials = []
-    data = db.materials.find()  # Fetch data from MongoDB
-    for d in data:
-        # Extract only the needed fields and include both _id and material_id
-        material = {
-            '_id': str(d['_id']),  # Convert ObjectId to string for JSON serialization
-            'material_id': d.get('material_id', 'N/A'),  # Treat material_id as a normal feature
-            'formula_pretty': d.get('formula_pretty', 'N/A'),  # Use get to avoid KeyError if the field is missing
-            'band_gap': d.get('band_gap', 'N/A'),  # Provide default values if key does not exist
-            'energy_above_hull': d.get('energy_above_hull', 'N/A')
-        }
-        materials.append(material)
-    return JsonResponse({"status": 0, "message": "ok", "data": materials})
-
-# @require_http_methods(["GET"])
-# def list(request):
-#     materials = []
-#     data = pymongo.MongoDB.materials.find()
-#     for d in data:
-#         materials.append({
-#             "id": str(d['_id']),  # 确保 ID 是字符串格式
-#             "prettyFormula": d['prettyFormula'],
-#             "elements": d['elements'],
-#             "bandGap": d['bandGap'],
-#             "structure": d['structure'],
-#             "description": d['description'],
-#             "poscar": d['poscar']
-#         })
-#     return response(0, "ok", materials)
 
 def findDataById(list, id):
     for i in range(len(list)):
