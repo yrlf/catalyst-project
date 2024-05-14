@@ -9,6 +9,8 @@ function Navbar() {
       </div>
       <ul style={navListStyle}>
         <li style={navItemStyle}><Link to="/" style={linkStyle}>Home</Link></li>
+        <li style={navItemStyle}><Link to={"/uploadreaction"} style={linkStyle}>Upload Reaction</Link></li>
+        <li style={navItemStyle}><Link to="/reactions" style={linkStyle}>Reactions</Link></li>
         <li style={navItemStyle}><Link to="/materials" style={linkStyle}>Materials</Link></li>
         <li style={navItemStyle}><Link to="/upload" style={linkStyle}>Upload</Link></li> 
         <li style={navItemStyle}><Link to="/about" style={linkStyle}>About</Link></li>

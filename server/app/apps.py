@@ -138,9 +138,20 @@ def detail(request):
                     poscar_content = poscar_file.get('body', '').decode('utf-8')
                 else:
                     poscar_content = poscar_file.get('body', '')
+        
+        # 定义一个帮助函数来处理每个材料的数据转换
+        ele = material.get("elements", "N/A")
+        # check and remove [ and ]
+        if ele:
+            if ele[0] == '[':
+                ele = ele[1:]
+            if ele[-1] == ']':
+                ele = ele[:-1]
+            if "Element" in ele:
+                ele = ele.replace("Element", "")                    
         material_data = {
             "formula_pretty": material.get('formula_pretty', 'N/A'),
-            "elements": material.get('elements', 'N/A'),
+            "elements": ele,
             "band_gap": material.get('band_gap', 'N/A'),
             "structure": material.get('structure', 'N/A'),
             "description": material.get('description', 'N/A'),

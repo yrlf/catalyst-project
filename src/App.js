@@ -8,6 +8,8 @@ import SearchBar from './components/SearchBar';
 import About from './components/About';
 import Contact from './components/Contact';
 import Home from './components/Home';
+import ReactionList from './components/ReactionList';
+import ReactionUpload from "./components/ReactionUpload";
 import './App.css';
 
 function App() {
@@ -17,10 +19,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/materials" element={<MaterialsList />} />
+          <Route path ="/reactions" element = {<ReactionList />} />
+          <Route path="/uploadreaction" element={<ReactionUpload />} />
         <Route path="/detail/:materialId" element={<MaterialPage />} />
         <Route path="/upload" element={<MaterialUpload />} />
-        {/* <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} /> */}
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </Router>
   );
