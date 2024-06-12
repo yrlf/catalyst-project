@@ -31,8 +31,6 @@ def response(code: int, message: str, data: any = None):
 
 db = pymongo.MongoDB
 
-
-
 def serialize_material(material):
     # 定义一个帮助函数来处理每个材料的数据转换
     ele = material.get("elements", "N/A")
@@ -248,6 +246,36 @@ def uploadPOSCAR(request):
         return response(0, "File uploaded successfully", {"id": str(result.inserted_id)})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods("POST")
+def uploadReaction(request):
+    try:
+        param = json.loads(request.body)
+
+        if not param:
+            return response(404, "No data provided")
+
+        current_time = int(time.time())
+        data = {
+            "material_id": param['material_id'],
+            "formula_pretty": param['formula_pretty'],
+            "elements": param['elements'],
+            "bandGap": param['bandGap'],
+            "structure": param['structure'],
+            "description": param['description'],
+            "poscar": param.get('poscar'),  # This should be the ID returned after file upload
+            "time": current_time,
+            'upload_from_page': 1 if param.get('upload_from_page') else 0,
+        }
+
+        pymongo.MongoDB.materials.insert_one(data)
+        return response(0, "Material uploaded successfully", {"id": param['material_id']})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
 
 @require_http_methods("POST")
 def upload(request):
